@@ -44,7 +44,10 @@ class Kernel extends BaseKernel
      */
     public function registerBundles(): \Generator
     {
-        foreach ((new \Bundles())->getBundles() as $class => $envs) {
+        /** @noinspection UsingInclusionReturnValueInspection */
+        $bundles = include __DIR__ . '/../config/bundles.php';
+
+        foreach ((array) $bundles as $class => $envs) {
             if (isset($envs['all']) || isset($envs[$this->environment])) {
                 yield new $class();
             }
