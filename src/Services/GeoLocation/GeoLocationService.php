@@ -10,7 +10,6 @@ use App\Services\GeoLocation\Interfaces\GeoLocationAddressInterface;
 use App\Services\GeoLocation\Interfaces\GeoLocationServiceInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
-use RuntimeException;
 
 class GeoLocationService implements GeoLocationServiceInterface
 {
@@ -113,8 +112,10 @@ class GeoLocationService implements GeoLocationServiceInterface
         }
 
         if (!$this->responseStructureIsValid($result)) {
-            throw new InvalidResponseStructureException(\sprintf('Response structure invalid: %s',
-                \json_encode($result)));
+            throw new InvalidResponseStructureException(\sprintf(
+                'Response structure invalid: %s',
+                \json_encode($result)
+            ));
         }
 
         return new GeoLocationAddress(
