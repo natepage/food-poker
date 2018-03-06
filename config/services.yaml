@@ -15,7 +15,7 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/*'
-        exclude: '../src/{Entity,Migrations,Tests,Kernel.php}'
+        exclude: '../src/{Database/Entities,Database/Migrations,Exceptions,Services,Tests,Kernel.php}'
 
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
@@ -25,9 +25,17 @@ services:
 
     # Binding Abstract with Concrete
     App\Services\Http\Interfaces\ClientInterface: '@App\Services\Http\Client'
-    App\Services\GeoLocation\Interfaces\GeoLocationServiceInterface: '@App\Services\GeoLocation\GeoLocationService'
+    App\Services\GeoLocation\Interfaces\GeoLocationServiceInterface: '@App\Services\GeoLocation\DatabaseGeoLocationService'
 
     # Application Services
     App\Services\Http\Client: ~
+
+    App\Services\GeoLocation\DatabaseGeoLocationService:
+        decorates: App\Services\GeoLocation\GeoLocationService
+        arguments:
+            - '@Doctrine\ORM\EntityManagerInterface'
+            - '@App\Services\GeoLocation\DatabaseGeoLocationService.inner'
+            - '@Cocur\Slugify\SlugifyInterface'
+
     App\Services\GeoLocation\GeoLocationService:
         arguments: ['%env(GOOGLE_GEOCODING_API_KEY)%']
