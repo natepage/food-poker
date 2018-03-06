@@ -63,11 +63,7 @@ class DatabaseGeoLocationService implements GeoLocationServiceInterface
             return $this->toGeoLocationAddress($cached);
         }
 
-        $geolocationAddress = $this->geoLocation->byAddress($address);
-
-        $this->cache($slug, $geolocationAddress);
-
-        return $geolocationAddress;
+        return $this->cache($slug, $this->geoLocation->byAddress($address));
     }
 
     /**
@@ -92,9 +88,7 @@ class DatabaseGeoLocationService implements GeoLocationServiceInterface
 
         $geolocationAddress = $this->geoLocation->byCoordinates($latitude, $longitude);
 
-        $this->cache($this->slugify->slugify($geolocationAddress->getAddress()), $geolocationAddress);
-
-        return $geolocationAddress;
+        return $this->cache($this->slugify->slugify($geolocationAddress->getAddress()), $geolocationAddress);
     }
 
     /**
@@ -103,9 +97,9 @@ class DatabaseGeoLocationService implements GeoLocationServiceInterface
      * @param string $slug
      * @param \App\Services\GeoLocation\Interfaces\GeoLocationAddressInterface $geoLocationAddress
      *
-     * @return void
+     * @return GeoLocationAddressInterface
      */
-    private function cache(string $slug, GeoLocationAddressInterface $geoLocationAddress): void
+    private function cache(string $slug, GeoLocationAddressInterface $geoLocationAddress): GeoLocationAddressInterface
     {
         $this->entityManager->persist((new Address())
             ->setSlug($slug)
@@ -114,6 +108,8 @@ class DatabaseGeoLocationService implements GeoLocationServiceInterface
             ->setLongitude($geoLocationAddress->getLongitude())
         );
         $this->entityManager->flush();
+
+        return $geoLocationAddress;
     }
 
     /**
