@@ -24,8 +24,10 @@ services:
         tags: ['controller.service_arguments']
 
     # Binding Abstract with Concrete
+    App\Services\Http\Interfaces\ClientInterface: '@App\Services\Http\Client'
     App\Services\GeoLocation\Interfaces\GeoLocationServiceInterface: '@App\Services\GeoLocation\GeoLocationService'
 
     # Application Services
+    App\Services\Http\Client: ~
     App\Services\GeoLocation\GeoLocationService:
         arguments: ['%env(GOOGLE_GEOCODING_API_KEY)%']

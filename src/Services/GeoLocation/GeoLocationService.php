@@ -8,8 +8,8 @@ use App\Services\GeoLocation\Exceptions\NoResultsException;
 use App\Services\GeoLocation\Exceptions\RequestException;
 use App\Services\GeoLocation\Interfaces\GeoLocationAddressInterface;
 use App\Services\GeoLocation\Interfaces\GeoLocationServiceInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
+use App\Services\Http\Interfaces\ClientInterface;
+use App\Services\Http\Exceptions\RequestException as ClientRequestException;
 
 class GeoLocationService implements GeoLocationServiceInterface
 {
@@ -24,7 +24,7 @@ class GeoLocationService implements GeoLocationServiceInterface
     private $baseUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
 
     /**
-     * @var \GuzzleHttp\Client
+     * @var \App\Services\Http\Interfaces\ClientInterface
      */
     private $client;
 
@@ -32,12 +32,12 @@ class GeoLocationService implements GeoLocationServiceInterface
      * GeoLocationService constructor.
      *
      * @param string $apiKey
-     * @param \GuzzleHttp\Client|null $client
+     * @param \App\Services\Http\Interfaces\ClientInterface $client
      */
-    public function __construct(string $apiKey, ?Client $client = null)
+    public function __construct(string $apiKey, ClientInterface $client)
     {
         $this->apiKey = $apiKey;
-        $this->client = $client ?? new Client();
+        $this->client = $client;
     }
 
     /**
@@ -93,19 +93,14 @@ class GeoLocationService implements GeoLocationServiceInterface
             $response = $this->client->request(
                 'GET',
                 $this->baseUrl,
-                ['query' => \array_merge(['key' => $this->apiKey], $query)]
+                \array_merge(['key' => $this->apiKey], \compact('query'))
             );
-            $contents = \json_decode($response->getBody()->getContents(), true);
-            $result = \reset($contents['results']);
-        } catch (GuzzleRequestException$exception) {
-            $message = null;
-
-            if (null !== $exception->getResponse()) {
-                $message = $exception->getResponse()->getBody()->getContents();
-            }
-
-            throw new RequestException(\sprintf('Request error: %s', $message ?? $exception->getMessage()));
+        } catch (ClientRequestException $exception) {
+            throw new RequestException($exception->getMessage(), $exception->getCode(), $exception);
         }
+
+        $result = $response['results'] ?? [];
+        $result = \reset($result);
 
         if (!$result) {
             throw new NoResultsException(\sprintf('No results for given query: %s', \json_encode($query)));
