@@ -28,6 +28,10 @@ services:
     App\Services\GeoLocation\Interfaces\GeoLocationServiceInterface: '@App\Services\GeoLocation\DatabaseGeoLocationService'
 
     # Application Services
+    App\Listeners\ExceptionEventListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }
+
     App\Services\Http\Client: ~
 
     App\Services\GeoLocation\GeoLocationService:

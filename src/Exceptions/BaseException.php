@@ -7,5 +7,16 @@ use Exception;
 
 class BaseException extends Exception
 {
-    //
+    /**
+     * Get array representation of exception.
+     *
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [
+            'code' => $this->code,
+            'message' => $this->message
+        ];
+    }
 }

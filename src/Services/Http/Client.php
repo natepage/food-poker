@@ -7,7 +7,7 @@ use App\Services\Http\Exceptions\RequestException;
 use App\Services\Http\Interfaces\ClientInterface;
 use GuzzleHttp\Client as Guzzle;
 use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
-use function GuzzleHttp\Psr7\str;
+use RuntimeException;
 
 class Client implements ClientInterface
 {
@@ -43,14 +43,32 @@ class Client implements ClientInterface
             $response = $this->guzzle->request($method, $url, $parameters);
 
             return \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        } catch (GuzzleRequestException | \RuntimeException $exception) {
-            $message = null;
-
-            if (null !== $exception->getResponse()) {
-                $message = str($exception->getResponse());
+        } catch (GuzzleRequestException | RuntimeException $exception) {
+            if ($exception instanceof GuzzleRequestException) {
+                $message = $this->getExceptionMessage($exception);
             }
 
             throw new RequestException(\sprintf('Request error: %s', $message ?? $exception->getMessage()));
         }
+    }
+
+    /**
+     * Get exception message.
+     *
+     * @param GuzzleRequestException $exception
+     *
+     * @return string
+     */
+    private function getExceptionMessage(GuzzleRequestException $exception): string
+    {
+        try {
+            if (null !== $exception->getResponse()) {
+                return $exception->getResponse()->getBody()->getContents();
+            }
+        } /** @noinspection BadExceptionsProcessingInspection */ catch (RuntimeException $exception) {
+            // Exception message return after catch
+        }
+
+        return $exception->getMessage();
     }
 }
