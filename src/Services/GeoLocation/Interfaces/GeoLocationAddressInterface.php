@@ -25,4 +25,11 @@ interface GeoLocationAddressInterface
      * @return string
      */
     public function getLongitude(): string;
+
+    /**
+     * Get array representation of geolocation address.
+     *
+     * @return array
+     */
+    public function toArray(): array;
 }

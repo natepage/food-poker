@@ -65,4 +65,18 @@ class GeoLocationAddress implements GeoLocationAddressInterface
     {
         return $this->longitude;
     }
+
+    /**
+     * Get array representation of geolocation address.
+     *
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [
+            'address' => $this->address,
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude
+        ];
+    }
 }
