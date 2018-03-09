@@ -38,6 +38,11 @@ class TestsController extends Controller
     {
         $address = $this->geolocation->byAddress($request->get('address'));
 
+        $dateTime = new \DateTime();
+        $array = [$dateTime];
+
+        \var_dump(\in_array($dateTime, $array, true));
+
         return $this->json($address->toArray());
     }
 }
