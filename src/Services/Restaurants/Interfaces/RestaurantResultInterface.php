@@ -8,11 +8,11 @@ use App\Helpers\Interfaces\RepositoryHelperInterface;
 interface RestaurantResultInterface extends RepositoryHelperInterface
 {
     /**
-     * Get restaurant vicinity.
+     * Get restaurant formatted address.
      *
      * @return null|string
      */
-    public function getVicinity(): ?string;
+    public function getFormattedAddress(): ?string;
 
     /**
      * Get restaurant name.

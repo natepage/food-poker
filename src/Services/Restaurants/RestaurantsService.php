@@ -23,7 +23,7 @@ class RestaurantsService implements RestaurantsServiceInterface
     /**
      * @var string
      */
-    private $baseUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
+    private $baseUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
 
     /**
      * @var \App\Services\Http\Interfaces\ClientInterface
@@ -107,7 +107,8 @@ class RestaurantsService implements RestaurantsServiceInterface
             'key' => $this->apiKey,
             'location' => \sprintf('%s,%s', $data->getLatitude(), $data->getLongitude()),
             'radius' => $radius,
-            'type' => 'restaurant'
+            'type' => 'restaurant',
+            'query' => $data->getQuery()
         ];
 
         if ($data->getOpenNow() ?? false) {

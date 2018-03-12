@@ -16,13 +16,23 @@ class RestaurantResult extends AbstractRepository implements RestaurantResultInt
     public function __construct(?array $data = null)
     {
         $this->attributes = [
+            'formatted_address',
             'name',
             'place_id',
             'price_level',
-            'rating',
-            'vicinity'
+            'rating'
         ];
         parent::__construct($data);
+    }
+
+    /**
+     * Get restaurant formatted address.
+     *
+     * @return null|string
+     */
+    public function getFormattedAddress(): ?string
+    {
+        return $this->get('formatted_address');
     }
 
     /**
@@ -63,15 +73,5 @@ class RestaurantResult extends AbstractRepository implements RestaurantResultInt
     public function getRating(): ?string
     {
         return $this->get('rating');
-    }
-
-    /**
-     * Get restaurant vicinity.
-     *
-     * @return null|string
-     */
-    public function getVicinity(): ?string
-    {
-        return $this->get('vinicity');
     }
 }

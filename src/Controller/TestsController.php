@@ -55,9 +55,10 @@ class TestsController extends Controller
         $restaurants = $this->restaurants->search(new RestaurantSearchData([
             'latitude' => $address->getLatitude(),
             'longitude' => $address->getLongitude(),
-            'radius' => $request->get('radius')
+            'radius' => $request->get('radius'),
+            'query' => $request->get('query')
         ]));
 
-        return $this->json($restaurants->random(1)->toArray());
+        return $this->json($restaurants->random(5)->toArray());
     }
 }

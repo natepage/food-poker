@@ -20,6 +20,7 @@ class RestaurantSearchData extends AbstractRepository implements RestaurantSearc
             'limit',
             'longitude',
             'open_now',
+            'query',
             'radius'
         ];
 
@@ -64,6 +65,16 @@ class RestaurantSearchData extends AbstractRepository implements RestaurantSearc
     public function getOpenNow(): ?bool
     {
         return $this->get('open_now');
+    }
+
+    /**
+     * Get query.
+     *
+     * @return null|string
+     */
+    public function getQuery(): ?string
+    {
+        return $this->get('query');
     }
 
     /**

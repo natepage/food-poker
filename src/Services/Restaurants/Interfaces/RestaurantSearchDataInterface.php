@@ -36,6 +36,13 @@ interface RestaurantSearchDataInterface extends RepositoryHelperInterface
     public function getOpenNow(): ?bool;
 
     /**
+     * Get query.
+     *
+     * @return null|string
+     */
+    public function getQuery(): ?string;
+
+    /**
      * Get radius.
      *
      * @return null|int|string
