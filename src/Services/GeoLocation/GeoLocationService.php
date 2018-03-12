@@ -96,7 +96,7 @@ class GeoLocationService implements GeoLocationServiceInterface
                 \array_merge(['key' => $this->apiKey], \compact('query'))
             );
         } catch (ClientRequestException $exception) {
-            throw new RequestException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new RequestException($exception->getExtendedMessage());
         }
 
         $result = $response['results'] ?? [];
