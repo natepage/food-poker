@@ -40,9 +40,13 @@ class TestsController extends Controller
      *
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      *
+     * @throws \App\Services\Restaurants\Exceptions\NoResultsException
+     * @throws \App\Services\Restaurants\Exceptions\InvalidRadiusException
+     * @throws \App\Services\Restaurants\Exceptions\InvalidLocationException
      * @throws \App\Services\GeoLocation\Exceptions\InvalidResponseStructureException
      * @throws \App\Services\GeoLocation\Exceptions\NoResultsException
      * @throws \App\Services\GeoLocation\Exceptions\RequestException
+     * @throws \App\Services\Restaurants\Exceptions\RequestException
      */
     public function test(Request $request): JsonResponse
     {
