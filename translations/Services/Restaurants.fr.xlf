@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" datatype="plaintext" original="file.ext">
+        <body>
+            <trans-unit id="response.no_results">
+                <source>response.no_results</source>
+                <target>Aucun résultat trouvé</target>
+            </trans-unit>
+            <trans-unit id="request.exception">
+                <source>request.exception</source>
+                <target>Une erreur est survenue lors de la requête vers service externe</target>
+            </trans-unit>
+            <trans-unit id="request.invalid_location">
+                <source>request.invalid_location</source>
+                <target>Location invalide</target>
+            </trans-unit>
+            <trans-unit id="request.invalid_radius">
+                <source>request.invalid_radius</source>
+                <target>Rayon invalide</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

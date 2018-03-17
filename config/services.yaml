@@ -27,16 +27,19 @@ services:
         tags: ['controller.service_arguments']
 
     # Binding Abstract with Concrete
-    App\Services\Http\Interfaces\ClientInterface: '@App\Services\Http\Client'
     App\Services\GeoLocation\Interfaces\GeoLocationServiceInterface: '@App\Services\GeoLocation\DatabaseGeoLocationService'
+    App\Services\Http\Interfaces\ClientInterface: '@App\Services\Http\Client'
+    App\Services\Restaurants\Interfaces\RestaurantsServiceInterface: '@App\Services\Restaurants\RestaurantsService'
 
-    # Application Services
+    # Exception Handler
     App\Listeners\ExceptionEventListener:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
 
+    # HTTP Client
     App\Services\Http\Client: ~
 
+    # GeoLocation
     App\Services\GeoLocation\GeoLocationService:
         arguments: ['%env(GOOGLE_GEOCODING_API_KEY)%']
 
@@ -53,3 +56,7 @@ services:
             - '@Doctrine\ORM\EntityManagerInterface'
             - '@App\Services\GeoLocation\DatabaseGeoLocationService.inner'
             - '@Cocur\Slugify\SlugifyInterface'
+
+    # Restaurants
+    App\Services\Restaurants\RestaurantsService:
+        arguments: ['%env(GOOGLE_PLACES_API_KEY)%']

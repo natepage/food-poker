@@ -4,9 +4,12 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Services\GeoLocation\Interfaces\GeoLocationServiceInterface;
+use App\Services\Restaurants\Interfaces\RestaurantsServiceInterface;
+use App\Services\Restaurants\RestaurantSearchData;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class TestsController extends Controller
 {
@@ -16,13 +19,20 @@ class TestsController extends Controller
     private $geolocation;
 
     /**
+     * @var \App\Services\Restaurants\Interfaces\RestaurantsServiceInterface
+     */
+    private $restaurants;
+
+    /**
      * TestsController constructor.
      *
      * @param \App\Services\GeoLocation\Interfaces\GeoLocationServiceInterface $geolocation
+     * @param \App\Services\Restaurants\Interfaces\RestaurantsServiceInterface $restaurants
      */
-    public function __construct(GeoLocationServiceInterface $geolocation)
+    public function __construct(GeoLocationServiceInterface $geolocation, RestaurantsServiceInterface $restaurants)
     {
         $this->geolocation = $geolocation;
+        $this->restaurants = $restaurants;
     }
 
     /**
@@ -30,19 +40,25 @@ class TestsController extends Controller
      *
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      *
+     * @throws \App\Services\Restaurants\Exceptions\NoResultsException
+     * @throws \App\Services\Restaurants\Exceptions\InvalidRadiusException
+     * @throws \App\Services\Restaurants\Exceptions\InvalidLocationException
      * @throws \App\Services\GeoLocation\Exceptions\InvalidResponseStructureException
      * @throws \App\Services\GeoLocation\Exceptions\NoResultsException
      * @throws \App\Services\GeoLocation\Exceptions\RequestException
+     * @throws \App\Services\Restaurants\Exceptions\RequestException
      */
     public function test(Request $request): JsonResponse
     {
         $address = $this->geolocation->byAddress($request->get('address'));
 
-        $dateTime = new \DateTime();
-        $array = [$dateTime];
+        $restaurants = $this->restaurants->search(new RestaurantSearchData([
+            'latitude' => $address->getLatitude(),
+            'longitude' => $address->getLongitude(),
+            'radius' => $request->get('radius'),
+            'query' => $request->get('query')
+        ]));
 
-        \var_dump(\in_array($dateTime, $array, true));
-
-        return $this->json($address->toArray());
+        return $this->json($restaurants->random(5)->toArray());
     }
 }
