@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Services\Restaurants;
 
-use App\Helpers\AbstractRepository;
+use App\Helpers\AbstractDataTransferObject;
 use App\Services\Restaurants\Interfaces\RestaurantSearchDataInterface;
 
-class RestaurantSearchData extends AbstractRepository implements RestaurantSearchDataInterface
+class RestaurantSearchData extends AbstractDataTransferObject implements RestaurantSearchDataInterface
 {
     /**
      * RestaurantSearchData constructor.

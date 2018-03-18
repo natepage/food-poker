@@ -3,6 +3,9 @@
 parameters:
     locale: 'en'
 
+imports:
+    - { resource: 'services/*.yaml' }
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -11,52 +14,9 @@ services:
         public: false       # Allows optimizing the container by removing unused services; this also means
                             # fetching services directly from the container via $container->get() won't work.
                             # The best practice is to be explicit about your dependencies anyway.
-        bind:
-            $env: '%env(APP_ENV)%'
-
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
-    App\:
-        resource: '../src/*'
-        exclude: '../src/{Database/Entities,Database/Migrations,Exceptions,Services,Tests,Kernel.php}'
 
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
     App\Controller\:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
-
-    # Binding Abstract with Concrete
-    App\Services\GeoLocation\Interfaces\GeoLocationServiceInterface: '@App\Services\GeoLocation\DatabaseGeoLocationService'
-    App\Services\Http\Interfaces\ClientInterface: '@App\Services\Http\Client'
-    App\Services\Restaurants\Interfaces\RestaurantsServiceInterface: '@App\Services\Restaurants\RestaurantsService'
-
-    # Exception Handler
-    App\Listeners\ExceptionEventListener:
-        tags:
-            - { name: kernel.event_listener, event: kernel.exception }
-
-    # HTTP Client
-    App\Services\Http\Client: ~
-
-    # GeoLocation
-    App\Services\GeoLocation\GeoLocationService:
-        arguments: ['%env(GOOGLE_GEOCODING_API_KEY)%']
-
-    App\Services\GeoLocation\RetryGeoLocationService:
-        decorates: 'App\Services\GeoLocation\GeoLocationService'
-        decoration_priority: 2
-        arguments:
-            - '@App\Services\GeoLocation\RetryGeoLocationService.inner'
-
-    App\Services\GeoLocation\DatabaseGeoLocationService:
-        decorates: 'App\Services\GeoLocation\GeoLocationService'
-        decoration_priority: 1
-        arguments:
-            - '@Doctrine\ORM\EntityManagerInterface'
-            - '@App\Services\GeoLocation\DatabaseGeoLocationService.inner'
-            - '@Cocur\Slugify\SlugifyInterface'
-
-    # Restaurants
-    App\Services\Restaurants\RestaurantsService:
-        arguments: ['%env(GOOGLE_PLACES_API_KEY)%']

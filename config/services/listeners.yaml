@@ -1,0 +1,25 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+        bind:
+            $env: '%env(APP_ENV)%'
+
+    # Entity validation
+    App\Listeners\EntityValidationSubscriber:
+        tags:
+            - { name: doctrine.event_listener, event: prePersist, lazy: true }
+            - { name: doctrine.event_listener, event: preUpdate, lazy: true }
+    # Exception Handler
+    App\Listeners\ExceptionListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }
+    # Request format
+    App\Listeners\FormatRequestListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.request }
+    # Response format
+    App\Listeners\FormatResponseListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.view }

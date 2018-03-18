@@ -4,11 +4,12 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Interfaces\ExceptionInterface;
+use App\Interfaces\ValidationFailedExceptionInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\Translation\TranslatorInterface;
 
-class ExceptionEventListener
+class ExceptionListener
 {
     /**
      * @var string
@@ -63,6 +64,11 @@ class ExceptionEventListener
                 }
 
                 $data['exception_class'] = \get_class($exception);
+            }
+
+            // Validation errors
+            if ($exception instanceof ValidationFailedExceptionInterface) {
+                $data['errors'] = $exception->getErrors();
             }
 
             $event->setResponse(new JsonResponse($data, $exception->getStatusCode(), $exception->getHeaders()));

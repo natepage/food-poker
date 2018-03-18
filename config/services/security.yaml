@@ -1,0 +1,6 @@
+services:
+    App\Services\Security\Interfaces\ApiKeyAuthenticatorInterface: '@App\Services\Security\ApiKeyAuthenticator'
+    App\Services\Security\Interfaces\GeneratorInterface: '@App\Services\Security\Generator'
+
+    App\Services\Security\ApiKeyAuthenticator: ~
+    App\Services\Security\Generator: ~
