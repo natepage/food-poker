@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace App\Database\Entities;
 
+use App\Interfaces\EntityInterface;
 use Doctrine\Common\Inflector\Inflector;
 
-abstract class AbstractEntity
+abstract class AbstractEntity implements EntityInterface
 {
     /**
      * AbstractEntity constructor.
@@ -22,9 +23,9 @@ abstract class AbstractEntity
      *
      * @param array $data
      *
-     * @return \App\Database\Entities\AbstractEntity
+     * @return \App\Interfaces\EntityInterface
      */
-    public function fill(array $data): self
+    public function fill(array $data): EntityInterface
     {
         foreach ($data as $property => $value) {
             $setter = \sprintf('set%s', Inflector::classify($property));
@@ -36,11 +37,4 @@ abstract class AbstractEntity
 
         return $this;
     }
-
-    /**
-     * Get validation failed exception class.
-     *
-     * @return string
-     */
-    abstract public function getValidationFailedException(): string;
 }

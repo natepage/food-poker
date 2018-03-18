@@ -6,31 +6,15 @@ namespace App\Controller;
 use App\Database\Entities\User;
 use App\Services\Security\Interfaces\GeneratorInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/users", name="users.")
  */
-class UsersController extends AbstractController
+class UsersController extends AbstractEntityController
 {
-    /**
-     * @var \App\Services\Security\Interfaces\GeneratorInterface
-     */
-    private $generator;
-
-    /**
-     * UsersController constructor.
-     *
-     * @param \Doctrine\ORM\EntityManagerInterface $entityManager
-     * @param \App\Services\Security\Interfaces\GeneratorInterface $generator
-     */
-    public function __construct(EntityManagerInterface $entityManager, GeneratorInterface $generator) {
-        parent::__construct($entityManager);
-
-        $this->generator = $generator;
-    }
-
     /**
      * @Route("", name="create", methods={"POST"})
      *
@@ -39,15 +23,14 @@ class UsersController extends AbstractController
      * @param \Symfony\Component\HttpFoundation\Request $request
      *
      * @return array
+     *
+     * @throws \App\Services\Repositories\Exceptions\UnableCreateRepositoryException
+     * @throws \App\Services\Repositories\Exceptions\InvalidEntityException
      */
     public function store(Request $request): array
     {
-        $user = new User($request->request->all());
-        $user
-            ->setSalt($this->generator->generateSalt())
-            ->setApiKey($this->generator->generateApiKey($user));
-
-        $this->saveEntity($user);
+        /** @var User $user */
+        $user = $this->getRepository()->create($request->request->all());
 
         return [
             'id' => $user->getId(),
@@ -65,20 +48,30 @@ class UsersController extends AbstractController
      *
      * @return array
      *
+     * @throws \App\Services\Repositories\Exceptions\InvalidEntityException
      * @throws \LogicException
+     * @throws \App\Interfaces\NotFoundExceptionInterface
+     * @throws \App\Services\Repositories\Exceptions\UnableCreateRepositoryException
      */
     public function update(Request $request): array
     {
         /** @var User $user */
-        $user = $this->getUser();
-        $user->fill($request->request->all());
-
-        $this->saveEntity($user);
+        $user = $this->getRepository()->update($this->getUser()->getId(), $request->request->all());
 
         return [
             'id' => $user->getId(),
             'email' => $user->getEmail(),
             'api_key' => $user->getApiKey()
         ];
+    }
+
+    /**
+     * Get entity class.
+     *
+     * @return string
+     */
+    protected function getEntity(): string
+    {
+        return User::class;
     }
 }

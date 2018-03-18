@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Database\Entities;
 
+use App\Database\Exceptions\NotFound\UserNotFoundException;
 use App\Database\Exceptions\ValidationFailed\UserValidationFailedException;
 use App\Services\Security\Interfaces\ApiUserInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -17,6 +18,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 class User extends AbstractEntity implements ApiUserInterface
 {
     /**
+     * @Assert\NotBlank()
+     *
      * @ORM\Column(name="api_key", type="string")
      *
      * @var string
@@ -122,6 +125,16 @@ class User extends AbstractEntity implements ApiUserInterface
     public function getId(): ?string
     {
         return $this->userId;
+    }
+
+    /**
+     * Get not found exception class.
+     *
+     * @return string
+     */
+    public function getNotFoundException(): string
+    {
+        return UserNotFoundException::class;
     }
 
     /**

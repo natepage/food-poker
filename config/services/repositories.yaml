@@ -1,0 +1,16 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: true
+
+    App\Services\Repositories\Interfaces\RepositoryFactoryInterface: '@App\Services\Repositories\RepositoryFactory'
+    App\Services\Repositories\Interfaces\RepositoryInterface: '@App\Services\Repositories\DefaultRepository'
+
+    # Factory
+    App\Services\Repositories\RepositoryFactory: ~
+    # Default repositories
+    App\Services\Repositories\DefaultRepository: ~
+    # Custom repositories
+    App\Database\Repositories\:
+        resource: '../../src/Database/Repositories'

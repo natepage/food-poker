@@ -6,6 +6,10 @@ services:
         bind:
             $env: '%env(APP_ENV)%'
 
+    # User API key and Salt
+    App\Listeners\Entities\GenerateUserApiKeyListener:
+        tags:
+            - { name: doctrine.event_listener, event: prePersist, lazy: true, priority: 100 }
     # Entity validation
     App\Listeners\EntityValidationSubscriber:
         tags:
