@@ -1,0 +1,4 @@
+services:
+    App\Services\Http\Interfaces\ClientInterface: '@App\Services\Http\Client'
+
+    App\Services\Http\Client: ~

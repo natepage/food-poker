@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Services\Restaurants;
 
-use App\Helpers\AbstractRepository;
+use App\Helpers\AbstractDataTransferObject;
 use App\Services\Restaurants\Interfaces\RestaurantResultInterface;
 
-class RestaurantResult extends AbstractRepository implements RestaurantResultInterface
+class RestaurantResult extends AbstractDataTransferObject implements RestaurantResultInterface
 {
     /**
      * RestaurantResult constructor.

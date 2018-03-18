@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Helpers\Interfaces;
 
-interface RepositoryHelperInterface
+interface DataTransferObjectHelperInterface
 {
     /**
      * Get value for given key or fallback to default.

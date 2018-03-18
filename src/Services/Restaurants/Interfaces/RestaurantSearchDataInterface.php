@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Services\Restaurants\Interfaces;
 
-use App\Helpers\Interfaces\RepositoryHelperInterface;
+use App\Helpers\Interfaces\DataTransferObjectHelperInterface;
 
-interface RestaurantSearchDataInterface extends RepositoryHelperInterface
+interface RestaurantSearchDataInterface extends DataTransferObjectHelperInterface
 {
     /**
      * Get latitude.

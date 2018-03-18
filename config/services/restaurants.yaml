@@ -1,0 +1,7 @@
+services:
+    App\Services\Restaurants\Interfaces\RestaurantsServiceInterface: '@App\Services\Restaurants\RestaurantsService'
+
+    App\Services\Restaurants\RestaurantsService:
+        arguments:
+            - '%env(GOOGLE_PLACES_API_KEY)%'
+            - '@App\Services\Http\Interfaces\ClientInterface'

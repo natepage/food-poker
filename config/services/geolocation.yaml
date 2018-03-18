@@ -1,0 +1,21 @@
+services:
+    App\Services\GeoLocation\Interfaces\GeoLocationServiceInterface: '@App\Services\GeoLocation\DatabaseGeoLocationService'
+
+    App\Services\GeoLocation\GeoLocationService:
+        arguments:
+            - '%env(GOOGLE_GEOCODING_API_KEY)%'
+            - '@App\Services\Http\Interfaces\ClientInterface'
+
+    App\Services\GeoLocation\RetryGeoLocationService:
+        decorates: 'App\Services\GeoLocation\GeoLocationService'
+        decoration_priority: 2
+        arguments:
+            - '@App\Services\GeoLocation\RetryGeoLocationService.inner'
+
+    App\Services\GeoLocation\DatabaseGeoLocationService:
+        decorates: 'App\Services\GeoLocation\GeoLocationService'
+        decoration_priority: 1
+        arguments:
+            - '@Doctrine\ORM\EntityManagerInterface'
+            - '@App\Services\GeoLocation\DatabaseGeoLocationService.inner'
+            - '@Cocur\Slugify\SlugifyInterface'

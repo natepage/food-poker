@@ -6,6 +6,10 @@
                 <source>default.exception</source>
                 <target>Something went wrong</target>
             </trans-unit>
+            <trans-unit id="entity.validation_failed">
+                <source>entity.validation_failed</source>
+                <target>Invalid data given</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>
