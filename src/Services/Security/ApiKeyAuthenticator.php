@@ -161,7 +161,7 @@ class ApiKeyAuthenticator extends AbstractGuardAuthenticator implements ApiKeyAu
      */
     public function supports(Request $request): bool
     {
-        return $request->server->has('PHP_AUTH_USER');
+        return null !== $request->server->get('PHP_AUTH_USER');
     }
 
     /**

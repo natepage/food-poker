@@ -3,13 +3,17 @@ declare(strict_types=1);
 
 namespace App\Database\Entities\GeoLocation;
 
+use Symfony\Component\Validator\Constraints as Assert;
+use App\Database\Entities\AbstractEntity;
+use App\Database\Exceptions\NotFound\GeoLocation\AddressNotFoundException;
+use App\Database\Exceptions\ValidationFailed\GeoLocation\AddressValidationFailedException;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity()
  * @ORM\Table(name="geolocation_addresses")
  */
-class Address
+class Address extends AbstractEntity
 {
     /**
      * @ORM\Id()
@@ -21,6 +25,8 @@ class Address
     private $addressId;
 
     /**
+     * @Assert\NotBlank()
+     *
      * @ORM\Column(name="formatted_address", type="string")
      *
      * @var string
@@ -28,6 +34,8 @@ class Address
     private $formattedAddress;
 
     /**
+     * @Assert\NotBlank()
+     *
      * @ORM\Column(name="latitude", type="string")
      *
      * @var string
@@ -35,6 +43,8 @@ class Address
     private $latitude;
 
     /**
+     * @Assert\NotBlank()
+     *
      * @ORM\Column(name="longitude", type="string")
      *
      * @var string
@@ -42,6 +52,8 @@ class Address
     private $longitude;
 
     /**
+     * @Assert\NotBlank()
+     *
      * @ORM\Column(name="slug", type="string")
      *
      * @var string
@@ -89,6 +101,16 @@ class Address
     }
 
     /**
+     * Get not found exception class.
+     *
+     * @return string
+     */
+    public function getNotFoundException(): string
+    {
+        return AddressNotFoundException::class;
+    }
+
+    /**
      * Get slug.
      *
      * @return string
@@ -96,6 +118,16 @@ class Address
     public function getSlug(): ?string
     {
         return $this->slug;
+    }
+
+    /**
+     * Get validation failed exception class.
+     *
+     * @return string
+     */
+    public function getValidationFailedException(): string
+    {
+        return AddressValidationFailedException::class;
     }
 
     /**

@@ -1,0 +1,132 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} {{ parent() }} | Roulette {% endblock %}
+
+{% block body %}
+    <div class="card border-primary text-center mt-3">
+        <div class="card-header">
+            <i class="fas fa-utensils"></i> Roulette
+        </div>
+        <div class="card-body">
+            <div class="input-group">
+                <input type="text" class="form-control" id="address" placeholder="Address to look around...">
+                <div class="input-group-append">
+                    <button id="btn-search-by-address" class="btn btn-outline-secondary" type="button">
+                        <i class="fab fa-searchengin"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="map" class="d-flex justify-content-center align-items-center google-maps"></div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            /* --- Variables --- */
+            var btnSearchByAddress = $('#btn-search-by-address');
+            var mapContainer = $('#map');
+
+            /* --- Functions -- */
+            // Enable or disable given button
+            function toggleBtn(btn) {
+                $(btn).prop('disabled', !$(btn).prop('disabled'));
+            }
+            // Get infoWindow content
+            function getInfoWindowContent(place) {
+                var content = '<h6>' + place.name + '</h6>' +
+                '<p>' + place.formatted_address + '</p>' +
+                '<p>' + place.formatted_phone_number + '</p>';
+
+                return content;
+            }
+            // Add restaurant on google maps
+            function addRestaurantToMap(restaurant) {
+                var map = new google.maps.Map(document.getElementById('map'), {
+                    center: {lat: -34.397, lng: 150.644},
+                    zoom: 4
+                });
+                var infoWindow = new google.maps.InfoWindow();
+                var places = new google.maps.places.PlacesService(map);
+
+                places.getDetails({
+                    placeId: restaurant.place_id
+                }, function(place, status) {
+                    if (status === google.maps.places.PlacesServiceStatus.OK) {
+                        var marker = new google.maps.Marker({
+                            map: map,
+                            position: place.geometry.location,
+                            animation: google.maps.Animation.DROP,
+                            label: 'R'
+                        });
+                        map.panTo(place.geometry.location);
+                        map.setZoom(5);
+
+                        infoWindow.setContent(getInfoWindowContent(place));
+                        infoWindow.open(map, marker);
+                    }
+                });
+            }
+            // Render error
+            function renderError(error) {
+                var modalStructure = '<div class="modal" tabindex="-1" role="dialog">' +
+                    '  <div class="modal-dialog" role="document">' +
+                    '    <div class="modal-content">' +
+                    '      <div class="modal-header">' +
+                    '        <h5 class="modal-title">Error</h5>' +
+                    '        <button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                    '          <span aria-hidden="true">&times;</span>' +
+                    '        </button>' +
+                    '      </div>' +
+                    '      <div class="modal-body">' +
+                    '        <p>' + error.responseJSON.message + '</p>' +
+                    '      </div>' +
+                    '      <div class="modal-footer">' +
+                    '        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>' +
+                    '      </div>' +
+                    '    </div>' +
+                    '  </div>' +
+                    '</div>';
+
+                $(modalStructure).modal();
+            }
+
+            /* --- Logic --- */
+            // Search by address
+            btnSearchByAddress.click(function () {
+                var address = $('#address').val();
+                var btn = this;
+
+                toggleBtn(btn); // Disable btn
+
+                $.ajax({
+                    method: 'POST',
+                    url: '{{ path('api.games.roulette') }}',
+                    headers: {'Content-Type': 'application/json'},
+                    data: JSON.stringify({address: address}),
+                    beforeSend: function () {
+                        mapContainer
+                            .css('height', '400px')
+                            .html('<i class="fas fa-spin fa-5x fa-circle-notch text-primary"></i>');
+                    },
+                    success: function (data) {
+                        toggleBtn(btn);
+                        addRestaurantToMap(data);
+                    },
+                    error: function (error) {
+                        mapContainer.css('height', '0px').html('');
+                        toggleBtn(btn);
+                        renderError(error);
+                    }
+                });
+            });
+        });
+
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ maps_js_apikey }}&libraries=places" async defer></script>
+{% endblock %}

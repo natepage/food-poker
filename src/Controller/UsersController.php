@@ -4,9 +4,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Database\Entities\User;
-use App\Services\Security\Interfaces\GeneratorInterface;
-use Doctrine\ORM\EntityManagerInterface;
-use Psr\Container\ContainerInterface;
+use App\Exceptions\Security\UnauthorisedException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -52,9 +50,14 @@ class UsersController extends AbstractEntityController
      * @throws \LogicException
      * @throws \App\Interfaces\NotFoundExceptionInterface
      * @throws \App\Services\Repositories\Exceptions\UnableCreateRepositoryException
+     * @throws \App\Exceptions\Security\UnauthorisedException
      */
     public function update(Request $request): array
     {
+        if (null === $this->getUser()) {
+            throw new UnauthorisedException();
+        }
+
         /** @var User $user */
         $user = $this->getRepository()->update($this->getUser()->getId(), $request->request->all());
 
