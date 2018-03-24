@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
-use App\Database\Entities\AbstractEntity;
+use App\Interfaces\EntityInterface;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events as DoctrineEvents;
@@ -68,11 +68,11 @@ class EntityValidationSubscriber implements EventSubscriber
     /**
      * Validates given entity and throws exception if errors.
      *
-     * @param \App\Database\Entities\AbstractEntity $entity
+     * @param \App\Interfaces\EntityInterface $entity
      *
      * @throws \App\Interfaces\ValidationFailedExceptionInterface
      */
-    private function validateEntity(AbstractEntity $entity): void
+    private function validateEntity(EntityInterface $entity): void
     {
         $errors = $this->validator->validate($entity);
 
