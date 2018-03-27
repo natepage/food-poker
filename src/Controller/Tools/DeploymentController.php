@@ -41,7 +41,7 @@ class DeploymentController extends Controller
             $output .= \sprintf(
                 "<span style=\"color: #6BE234;\">\$</span> <span style=\"color: #729FCF;\">{%s}\n</span>%s\n",
                 $command,
-                \htmlentities(\trim($tmp))
+                \htmlentities(\trim($tmp ?? 'no output'))
             );
         }
 
