@@ -50,6 +50,8 @@
                 app.factory('$appErrorHandler', function ($mdToast) {
                     return {
                         render: function (message) {
+                            message = message || 'Something went wrong...';
+
                             $mdToast.show(
                                 $mdToast.simple()
                                     .textContent(message)
