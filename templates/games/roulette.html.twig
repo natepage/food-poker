@@ -3,22 +3,41 @@
 {% block title %} {{ parent() }} | Roulette {% endblock %}
 
 {% block body %}
-    <div class="card border-primary text-center mt-3">
-        <div class="card-header">
-            <i class="fas fa-utensils"></i> Roulette
-        </div>
-        <div class="card-body">
-            <div class="input-group">
-                <input type="text" class="form-control" id="address" placeholder="Address to look around...">
-                <div class="input-group-append">
-                    <button id="btn-search-by-address" class="btn btn-outline-secondary" type="button">
-                        <i class="fab fa-searchengin"></i>
-                    </button>
-                </div>
+    <div id="roulette-ctrl" ng-controller="RouletteCtrl" layout="column" layout-align="center none" ng-cloak>
+        <div class="form-container" ng-show="showForm">
+            <md-input-container class="md-block">
+                <label for="address">Address</label>
+                <input id="address" name="address" title="Address" ng-model="address" placeholder="Enter a location">
+            </md-input-container>
+            <div layout="column" layout-align="center none">
+                <span>Radius</span>
+                <md-slider-container>
+                    <md-slider flex ng-model="radius" step="50" min="50" max="50000" aria-label="radius"></md-slider>
+                    <md-input-container>
+                        <input flex type="number" ng-model="radius" aria-label="radius" aria-controls="radius-slider" title="Radius">
+                    </md-input-container>
+                </md-slider-container>
+            </div>
+            <md-input-container class="md-block">
+                <label for="query">Query</label>
+                <input name="query" title="Query" ng-model="query">
+            </md-input-container>
+            <div layout="column" layout-align="center center">
+                <md-button class="md-fab" aria-label="Search" style="padding: 4px;" ng-click="searchRestaurant()">
+                    <i class="fab fa-2x fa-searchengin"></i>
+                </md-button>
             </div>
         </div>
-        <div class="card-body">
-            <div id="map" class="d-flex justify-content-center align-items-center google-maps"></div>
+        <div class="spinner-container" ng-show="showSpinner" layout="row" layout-align="center center">
+            <md-progress-circular md-mode="indeterminate" md-diameter="96"></md-progress-circular>
+        </div>
+        <div id="map-container" layout="column" layout-align="center none" ng-show="showMap">
+            <div layout="column" layout-align="center center">
+                <md-button class="md-raised md-primary" aria-label="Retry" ng-click="toggleShows(true, false, false)">
+                    <i class="fab fa-searchengin"></i> Retry
+                </md-button>
+            </div>
+            <div id="map" style="height: 400px;"></div>
         </div>
     </div>
 {% endblock %}
@@ -27,106 +46,99 @@
     {{ parent() }}
 
     <script type="text/javascript">
-        $(document).ready(function () {
-            /* --- Variables --- */
-            var btnSearchByAddress = $('#btn-search-by-address');
-            var mapContainer = $('#map');
+        // Google Maps
+        app.factory('$appGoogleMaps', function () {
+            return {
+                setupAutocomplete: function (inputId, $scope) {
+                    var input = document.getElementById(inputId);
+                    var autocomplete = new google.maps.places.Autocomplete(input);
 
-            /* --- Functions -- */
-            // Enable or disable given button
-            function toggleBtn(btn) {
-                $(btn).prop('disabled', !$(btn).prop('disabled'));
-            }
-            // Get infoWindow content
-            function getInfoWindowContent(place) {
-                var content = '<h6>' + place.name + '</h6>' +
-                '<p>' + place.formatted_address + '</p>' +
-                '<p>' + place.formatted_phone_number + '</p>';
+                    input.removeAttribute('placeholder');
 
-                return content;
-            }
-            // Add restaurant on google maps
-            function addRestaurantToMap(restaurant) {
-                var map = new google.maps.Map(document.getElementById('map'), {
-                    center: {lat: -34.397, lng: 150.644},
-                    zoom: 4
-                });
-                var infoWindow = new google.maps.InfoWindow();
-                var places = new google.maps.places.PlacesService(map);
+                    autocomplete.addListener('place_changed', function() {
+                         var place = autocomplete.getPlace();
 
-                places.getDetails({
-                    placeId: restaurant.place_id
-                }, function(place, status) {
-                    if (status === google.maps.places.PlacesServiceStatus.OK) {
-                        var marker = new google.maps.Marker({
-                            map: map,
-                            position: place.geometry.location,
-                            animation: google.maps.Animation.DROP,
-                            label: 'R'
-                        });
-                        map.panTo(place.geometry.location);
-                        map.setZoom(5);
+                         if (place.formatted_address) {
+                             $scope.address = place.formatted_address;
+                         }
+                    });
+                },
+                createMapForRestaurant: function (containerId, restaurant) {
+                    var map = new google.maps.Map(document.getElementById(containerId), {zoom: 4});
+                    var infoWindow = new google.maps.InfoWindow();
+                    var places = new google.maps.places.PlacesService(map);
+                    var getInfoWindowContent = function (place) {
+                        return '<div style="height: 100%; width: 100%; text-align: center;"><h2>' + place.name + '</h2>' +
+                            '<p>' + place.formatted_address + '</p>' +
+                            '<p>' + place.formatted_phone_number + '</p></div>';
+                    };
 
-                        infoWindow.setContent(getInfoWindowContent(place));
-                        infoWindow.open(map, marker);
-                    }
-                });
-            }
-            // Render error
-            function renderError(error) {
-                var modalStructure = '<div class="modal" tabindex="-1" role="dialog">' +
-                    '  <div class="modal-dialog" role="document">' +
-                    '    <div class="modal-content">' +
-                    '      <div class="modal-header">' +
-                    '        <h5 class="modal-title">Error</h5>' +
-                    '        <button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
-                    '          <span aria-hidden="true">&times;</span>' +
-                    '        </button>' +
-                    '      </div>' +
-                    '      <div class="modal-body">' +
-                    '        <p>' + error.responseJSON.message + '</p>' +
-                    '      </div>' +
-                    '      <div class="modal-footer">' +
-                    '        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>' +
-                    '      </div>' +
-                    '    </div>' +
-                    '  </div>' +
-                    '</div>';
+                    places.getDetails({placeId: restaurant.place_id}, function(place, status) {
+                        if (status === google.maps.places.PlacesServiceStatus.OK) {
+                            var marker = new google.maps.Marker({
+                                map: map,
+                                position: place.geometry.location,
+                                animation: google.maps.Animation.DROP,
+                                label: 'R'
+                            });
+                            map.panTo(place.geometry.location);
+                            map.setZoom(15);
 
-                $(modalStructure).modal();
-            }
-
-            /* --- Logic --- */
-            // Search by address
-            btnSearchByAddress.click(function () {
-                var address = $('#address').val();
-                var btn = this;
-
-                toggleBtn(btn); // Disable btn
-
-                $.ajax({
-                    method: 'POST',
-                    url: '{{ path('api.games.roulette') }}',
-                    headers: {'Content-Type': 'application/json'},
-                    data: JSON.stringify({address: address}),
-                    beforeSend: function () {
-                        mapContainer
-                            .css('height', '400px')
-                            .html('<i class="fas fa-spin fa-5x fa-circle-notch text-primary"></i>');
-                    },
-                    success: function (data) {
-                        toggleBtn(btn);
-                        addRestaurantToMap(data);
-                    },
-                    error: function (error) {
-                        mapContainer.css('height', '0px').html('');
-                        toggleBtn(btn);
-                        renderError(error);
-                    }
-                });
-            });
+                            infoWindow.setContent(getInfoWindowContent(place));
+                            infoWindow.open(map, marker);
+                        }
+                    });
+                }
+            };
         });
+        app.controller('RouletteCtrl', function ($scope, $http, $appErrorHandler, $appGoogleMaps) {
+            $scope.address = null;
+            $scope.radius = 1000;
+            $scope.query = null;
+            $scope.showForm = true;
+            $scope.showMap = false;
+            $scope.showSpinner = false;
 
+            angular.element(function () {
+                $appGoogleMaps.setupAutocomplete('address', $scope);
+            });
+
+            // Toggle show variables for UI sections
+            $scope.toggleShows = function (form, map, spinner) {
+                $scope.showForm = form;
+                $scope.showMap = map;
+                $scope.showSpinner = spinner;
+            };
+            // Function called before sending request to API
+            $scope.beforeSend = function () {
+                $scope.toggleShows(false, false, true);
+            };
+            // Success fallback
+            $scope.successRoulette = function (response) {
+                $scope.toggleShows(false, true, false);
+                $appGoogleMaps.createMapForRestaurant('map', response.data);
+            };
+            // Error fallback
+            $scope.errorRoulette = function (error) {
+                $scope.toggleShows(true, false, false);
+                $appErrorHandler.render(error.data.message);
+            };
+            // Send request to API
+            $scope.searchRestaurant = function () {
+                var payload = {
+                    address: $scope.address,
+                    radius: $scope.radius
+                };
+
+                if (null !== $scope.query) {
+                    payload.query = $scope.query;
+                }
+
+                $http
+                    .post('{{ path('api.games.roulette') }}', payload, {beforeSend: $scope.beforeSend})
+                    .then($scope.successRoulette, $scope.errorRoulette);
+            };
+        });
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key={{ maps_js_apikey }}&libraries=places" async defer></script>
 {% endblock %}

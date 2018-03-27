@@ -2,34 +2,65 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{% block title %}FoodPoker{% endblock %}</title>
         {% block stylesheets %}
-            <link rel="stylesheet"
-                  href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-                  integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-                  crossorigin="anonymous">
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
+            <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.8/angular-material.min.css">
         {% endblock %}
     </head>
-    <body>
-        <div class="container">
+    <body ng-app="FoodPokerApp" ng-cloak>
+        <md-toolbar>
+            <div class="md-toolbar-tools" layout="row" layout-padding>
+                <h2 flex md-truncate>
+                    <a href="{{ path('index') }}"><i class="fas fa-utensils"></i> FoodPoker - Roulette</a>
+                </h2>
+            </div>
+        </md-toolbar>
+
+        <md-content id="app-content" md-scroll-y layout="column" layout-align="center none" layout-padding>
             {% block body %}{% endblock %}
-        </div>
+        </md-content>
+
         {% block javascripts %}
-            <script defer
-                    src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"
-                    integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ"
-                    crossorigin="anonymous"></script>
-            <script
-                    src="https://code.jquery.com/jquery-3.3.1.min.js"
-                    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-                    crossorigin="anonymous"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-                    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-                    crossorigin="anonymous"></script>
-            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-                    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-                    crossorigin="anonymous"></script>
+            <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
+            <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+            <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-animate.min.js"></script>
+            <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-aria.min.js"></script>
+            <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-messages.min.js"></script>
+            <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.8/angular-material.min.js"></script>
+
+            <script type="text/javascript">
+                var app = angular.module('FoodPokerApp', ['ngMaterial']);
+                // Enable beforeSend on HTTP client
+                app.config(['$httpProvider', function ($httpProvider) {
+                    $httpProvider.interceptors.push(function () {
+                        return {
+                            request: function (request) {
+                                if (request.beforeSend) {
+                                    request.beforeSend();
+                                }
+
+                                return request;
+                            }
+                        }
+                    });
+                }]);
+                // Error Handler
+                app.factory('$appErrorHandler', function ($mdToast) {
+                    return {
+                        render: function (message) {
+                            $mdToast.show(
+                                $mdToast.simple()
+                                    .textContent(message)
+                                    .position('top right')
+                                    .parent(document.getElementById('app-content'))
+                                    .hideDelay(3000)
+                            );
+                        }
+                    };
+                });
+            </script>
         {% endblock %}
     </body>
 </html>
