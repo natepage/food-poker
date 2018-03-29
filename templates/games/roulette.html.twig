@@ -4,10 +4,13 @@
 
 {% block body %}
     <div id="roulette-ctrl" ng-controller="RouletteCtrl" layout="column" layout-align="center none" ng-cloak>
-        <div class="form-container" ng-show="showForm">
+        <div ng-form="rouletteForm" class="form-container" ng-show="showForm">
             <md-input-container class="md-block">
                 <label for="address">Address</label>
-                <input id="address" name="address" title="Address" ng-model="address" placeholder="Enter a location">
+                <input id="address" name="address" title="Address" ng-model="address" placeholder="Enter a location" required>
+                <div ng-messages="rouletteForm.address.$error">
+                    <div ng-message="required">You must provide an address.</div>
+                </div>
             </md-input-container>
             <div layout="column" layout-align="center none">
                 <span>Radius</span>
@@ -32,8 +35,11 @@
             <md-progress-circular md-mode="indeterminate" md-diameter="96"></md-progress-circular>
         </div>
         <div id="map-container" layout="column" layout-align="center none" ng-show="showMap">
-            <div layout="column" layout-align="center center">
-                <md-button class="md-raised md-primary" aria-label="Retry" ng-click="toggleShows(true, false, false)">
+            <div layout="row" layout-align="center center">
+                <md-button class="md-raised md-default" aria-label="Change address" ng-click="toggleShows(true, false, false)">
+                    Change address
+                </md-button>
+                <md-button class="md-raised md-primary" aria-label="Retry" ng-click="searchRestaurant()">
                     <i class="fab fa-searchengin"></i> Retry
                 </md-button>
             </div>
@@ -92,6 +98,7 @@
             };
         });
         app.controller('RouletteCtrl', function ($scope, $http, $appErrorHandler, $appGoogleMaps) {
+            $scope.rouletteForm = {};
             $scope.address = null;
             $scope.radius = 1000;
             $scope.query = null;
