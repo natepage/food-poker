@@ -4,37 +4,10 @@ declare(strict_types=1);
 namespace App\Services\Restaurants;
 
 use App\Helpers\AbstractDataTransferObject;
-use App\Services\Restaurants\Interfaces\RestaurantResultInterface;
+use App\Services\Restaurants\Interfaces\ResultInterface;
 
-class RestaurantResult extends AbstractDataTransferObject implements RestaurantResultInterface
+class Result extends AbstractDataTransferObject implements ResultInterface
 {
-    /**
-     * RestaurantResult constructor.
-     *
-     * @param array|null $data
-     */
-    public function __construct(?array $data = null)
-    {
-        $this->attributes = [
-            'formatted_address',
-            'name',
-            'place_id',
-            'price_level',
-            'rating'
-        ];
-        parent::__construct($data);
-    }
-
-    /**
-     * Get restaurant formatted address.
-     *
-     * @return null|string
-     */
-    public function getFormattedAddress(): ?string
-    {
-        return $this->get('formatted_address');
-    }
-
     /**
      * Get restaurant name.
      *
@@ -73,5 +46,35 @@ class RestaurantResult extends AbstractDataTransferObject implements RestaurantR
     public function getRating(): ?string
     {
         return $this->get('rating');
+    }
+
+    /**
+     * Check if result is in radius.
+     *
+     * @return bool
+     */
+    public function isInRadius(): bool
+    {
+        return (bool)$this->get('in_radius');
+    }
+
+    /**
+     * Initiate attributes.
+     *
+     * @return array
+     */
+    protected function initAttributes(): array
+    {
+        return [
+            'distance_text',
+            'distance_value',
+            'duration_text',
+            'duration_value',
+            'in_radius',
+            'name',
+            'place_id',
+            'price_level',
+            'rating'
+        ];
     }
 }

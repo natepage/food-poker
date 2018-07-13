@@ -5,7 +5,7 @@ namespace App\Services\Restaurants\Interfaces;
 
 use App\Helpers\Interfaces\CollectionHelperInterface;
 
-interface RestaurantResultsCollectionInterface extends CollectionHelperInterface
+interface ResultsCollectionInterface extends CollectionHelperInterface
 {
     //
 }

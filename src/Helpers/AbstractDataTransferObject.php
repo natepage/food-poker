@@ -8,11 +8,6 @@ abstract class AbstractDataTransferObject
     /**
      * @var array
      */
-    protected $attributes = [];
-
-    /**
-     * @var array
-     */
     protected $data = [];
 
     /**
@@ -23,7 +18,7 @@ abstract class AbstractDataTransferObject
     public function __construct(?array $data = null)
     {
         $data = $data ?? [];
-        foreach ($this->attributes as $attribute) {
+        foreach ($this->initAttributes() as $attribute) {
             if (isset($data[$attribute])) {
                 $this->data[$attribute] = $data[$attribute];
             }
@@ -44,6 +39,25 @@ abstract class AbstractDataTransferObject
     }
 
     /**
+     * Set value for given key.
+     *
+     * @param string $key
+     * @param mixed $value
+     *
+     * @return \App\Helpers\AbstractDataTransferObject
+     */
+    public function set(string $key, $value): self
+    {
+        if (\in_array($key, $this->initAttributes(), true) === false) {
+            return $this;
+        }
+
+        $this->data[$key] = $value;
+
+        return $this;
+    }
+
+    /**
      * Get array representation.
      *
      * @param array|null $defaults
@@ -55,10 +69,17 @@ abstract class AbstractDataTransferObject
         $array = [];
         $defaults = $defaults ?? [];
 
-        foreach ($this->attributes as $attribute) {
+        foreach ($this->initAttributes() as $attribute) {
             $array[$attribute] = $this->get($attribute, $defaults[$attribute] ?? null);
         }
 
         return $array;
     }
+
+    /**
+     * Initiate attributes.
+     *
+     * @return array
+     */
+    abstract protected function initAttributes(): array;
 }

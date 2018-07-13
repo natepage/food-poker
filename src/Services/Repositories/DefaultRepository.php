@@ -61,6 +61,33 @@ class DefaultRepository extends AbstractRepository
     }
 
     /**
+     * Find entity for given filters.
+     *
+     * @param array $filters
+     *
+     * @return \App\Interfaces\EntityInterface
+     *
+     * @throws \App\Interfaces\NotFoundExceptionInterface
+     */
+    public function findOneBy(array $filters): EntityInterface
+    {
+        $entity = $this->getRepository()->findOneBy($filters);
+
+        if (null === $entity) {
+            $exceptionClass = $this->instantiateEntity([])->getNotFoundException();
+
+            throw new $exceptionClass(\sprintf(
+                '%s for filters [%s] does not exist',
+                $this->entity,
+                $this->formatFiltersForException($filters)
+            ));
+        }
+
+        /** @var EntityInterface $entity */
+        return $entity;
+    }
+
+    /**
      * Update entity for given id and data.
      *
      * @param string $id

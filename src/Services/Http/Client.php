@@ -36,6 +36,7 @@ class Client implements ClientInterface
      * @return array
      *
      * @throws \App\Services\Http\Exceptions\RequestException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function request(string $method, string $url, ?array $parameters = null): array
     {

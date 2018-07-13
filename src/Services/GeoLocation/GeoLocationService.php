@@ -8,8 +8,8 @@ use App\Services\GeoLocation\Exceptions\NoResultsException;
 use App\Services\GeoLocation\Exceptions\RequestException;
 use App\Services\GeoLocation\Interfaces\GeoLocationAddressInterface;
 use App\Services\GeoLocation\Interfaces\GeoLocationServiceInterface;
-use App\Services\Http\Interfaces\ClientInterface;
 use App\Services\Http\Exceptions\RequestException as ClientRequestException;
+use App\Services\Http\Interfaces\ClientInterface;
 
 class GeoLocationService implements GeoLocationServiceInterface
 {
@@ -89,11 +89,13 @@ class GeoLocationService implements GeoLocationServiceInterface
      */
     private function request(array $query): GeoLocationAddressInterface
     {
+        $extraParameters = ['key' => $this->apiKey];
+
         try {
             $response = $this->client->request(
                 'GET',
                 $this->baseUrl,
-                \array_merge(['key' => $this->apiKey], \compact('query'))
+                ['query' => \array_merge($query, $extraParameters)]
             );
         } catch (ClientRequestException $exception) {
             throw new RequestException($exception->getExtendedMessage());
@@ -106,7 +108,7 @@ class GeoLocationService implements GeoLocationServiceInterface
             throw new NoResultsException(\sprintf('No results for given query: %s', \json_encode($query)));
         }
 
-        if (!$this->responseStructureIsValid($result)) {
+        if ($this->responseStructureIsValid($result) === false) {
             throw new InvalidResponseStructureException(\sprintf(
                 'Response structure invalid: %s',
                 \json_encode($result)
@@ -114,9 +116,9 @@ class GeoLocationService implements GeoLocationServiceInterface
         }
 
         return new GeoLocationAddress(
-            (string) $result['formatted_address'],
-            (string) $result['geometry']['location']['lat'],
-            (string) $result['geometry']['location']['lng']
+            (string)$result['formatted_address'],
+            (string)$result['geometry']['location']['lat'],
+            (string)$result['geometry']['location']['lng']
         );
     }
 
@@ -129,8 +131,10 @@ class GeoLocationService implements GeoLocationServiceInterface
      */
     private function responseStructureIsValid(array $response): bool
     {
-        return isset($response['formatted_address'])
-            && isset($response['geometry']['location']['lat'])
-            && isset($response['geometry']['location']['lng']);
+        return isset(
+            $response['formatted_address'],
+            $response['geometry']['location']['lat'],
+            $response['geometry']['location']['lng']
+        );
     }
 }

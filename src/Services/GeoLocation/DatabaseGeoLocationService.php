@@ -4,22 +4,23 @@ declare(strict_types=1);
 namespace App\Services\GeoLocation;
 
 use App\Database\Entities\GeoLocation\Address;
+use App\Interfaces\NotFoundExceptionInterface;
 use App\Services\GeoLocation\Interfaces\GeoLocationAddressInterface;
 use App\Services\GeoLocation\Interfaces\GeoLocationServiceInterface;
+use App\Services\Repositories\Interfaces\RepositoryFactoryInterface;
 use Cocur\Slugify\SlugifyInterface;
-use Doctrine\ORM\EntityManagerInterface;
 
 class DatabaseGeoLocationService implements GeoLocationServiceInterface
 {
     /**
-     * @var \Doctrine\ORM\EntityManagerInterface
-     */
-    private $entityManager;
-
-    /**
      * @var GeoLocationServiceInterface
      */
     private $geoLocation;
+
+    /**
+     * @var \App\Services\Repositories\Interfaces\RepositoryFactoryInterface
+     */
+    private $repositoryFactory;
 
     /**
      * @var \Cocur\Slugify\SlugifyInterface
@@ -29,16 +30,16 @@ class DatabaseGeoLocationService implements GeoLocationServiceInterface
     /**
      * DatabaseGeoLocationService constructor.
      *
-     * @param \Doctrine\ORM\EntityManagerInterface $entityManager
+     * @param \App\Services\Repositories\Interfaces\RepositoryFactoryInterface $repositoryFactory
      * @param \App\Services\GeoLocation\Interfaces\GeoLocationServiceInterface $geoLocationService
      * @param \Cocur\Slugify\SlugifyInterface $slugify
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        RepositoryFactoryInterface $repositoryFactory,
         GeoLocationServiceInterface $geoLocationService,
         SlugifyInterface $slugify
     ) {
-        $this->entityManager = $entityManager;
+        $this->repositoryFactory = $repositoryFactory;
         $this->geoLocation = $geoLocationService;
         $this->slugify = $slugify;
     }
@@ -50,9 +51,11 @@ class DatabaseGeoLocationService implements GeoLocationServiceInterface
      *
      * @return \App\Services\GeoLocation\Interfaces\GeoLocationAddressInterface
      *
-     * @throws \App\Services\GeoLocation\Exceptions\RequestException
-     * @throws \App\Services\GeoLocation\Exceptions\NoResultsException
      * @throws \App\Services\GeoLocation\Exceptions\InvalidResponseStructureException
+     * @throws \App\Services\GeoLocation\Exceptions\NoResultsException
+     * @throws \App\Services\GeoLocation\Exceptions\RequestException
+     * @throws \App\Services\Repositories\Exceptions\InvalidEntityException
+     * @throws \App\Services\Repositories\Exceptions\UnableCreateRepositoryException
      */
     public function byAddress(string $address): GeoLocationAddressInterface
     {
@@ -74,9 +77,11 @@ class DatabaseGeoLocationService implements GeoLocationServiceInterface
      *
      * @return \App\Services\GeoLocation\Interfaces\GeoLocationAddressInterface
      *
-     * @throws \App\Services\GeoLocation\Exceptions\RequestException
-     * @throws \App\Services\GeoLocation\Exceptions\NoResultsException
      * @throws \App\Services\GeoLocation\Exceptions\InvalidResponseStructureException
+     * @throws \App\Services\GeoLocation\Exceptions\NoResultsException
+     * @throws \App\Services\GeoLocation\Exceptions\RequestException
+     * @throws \App\Services\Repositories\Exceptions\InvalidEntityException
+     * @throws \App\Services\Repositories\Exceptions\UnableCreateRepositoryException
      */
     public function byCoordinates(string $latitude, string $longitude): GeoLocationAddressInterface
     {
@@ -97,17 +102,19 @@ class DatabaseGeoLocationService implements GeoLocationServiceInterface
      * @param string $slug
      * @param \App\Services\GeoLocation\Interfaces\GeoLocationAddressInterface $geoLocationAddress
      *
-     * @return GeoLocationAddressInterface
+     * @return \App\Services\GeoLocation\Interfaces\GeoLocationAddressInterface
+     *
+     * @throws \App\Services\Repositories\Exceptions\InvalidEntityException
+     * @throws \App\Services\Repositories\Exceptions\UnableCreateRepositoryException
      */
     private function cache(string $slug, GeoLocationAddressInterface $geoLocationAddress): GeoLocationAddressInterface
     {
-        $this->entityManager->persist((new Address())
-            ->setSlug($slug)
-            ->setFormattedAddress($geoLocationAddress->getAddress())
-            ->setLatitude($geoLocationAddress->getLatitude())
-            ->setLongitude($geoLocationAddress->getLongitude())
-        );
-        $this->entityManager->flush();
+        $this->repositoryFactory->create(Address::class)->create([
+            'slug' => $slug,
+            'formatted_address' => $geoLocationAddress->getAddress(),
+            'latitude' => $geoLocationAddress->getLatitude(),
+            'longitude' => $geoLocationAddress->getLongitude()
+        ]);
 
         return $geoLocationAddress;
     }
@@ -118,10 +125,20 @@ class DatabaseGeoLocationService implements GeoLocationServiceInterface
      * @param array $parameters
      *
      * @return \App\Database\Entities\GeoLocation\Address|null
+     *
+     * @throws \App\Services\Repositories\Exceptions\InvalidEntityException
+     * @throws \App\Services\Repositories\Exceptions\UnableCreateRepositoryException
      */
     private function findCached(array $parameters): ?Address
     {
-        return $this->entityManager->getRepository(Address::class)->findOneBy($parameters);
+        try {
+            /** @var Address $address */
+            $address = $this->repositoryFactory->create(Address::class)->findOneBy($parameters);
+        } catch (NotFoundExceptionInterface $exception) {
+            return null;
+        }
+
+        return $address;
     }
 
     /**

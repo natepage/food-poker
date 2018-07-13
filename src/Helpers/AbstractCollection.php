@@ -17,6 +17,11 @@ abstract class AbstractCollection extends ArrayCollection implements CollectionH
      */
     public function random(?int $number = null): CollectionHelperInterface
     {
+        // If collection empty, returns it
+        if (empty($this->getIterator()->getArrayCopy())) {
+            return $this;
+        }
+
         $number = $number ?? 1;
 
         // If number is 0, returns empty collection

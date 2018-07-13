@@ -1,7 +1,19 @@
 services:
     App\Services\Restaurants\Interfaces\RestaurantsServiceInterface: '@App\Services\Restaurants\RestaurantsService'
+    App\Services\Restaurants\Interfaces\DistanceServiceInterface: '@App\Services\Restaurants\DistanceService'
+    App\Services\Restaurants\Interfaces\SearchServiceInterface: '@App\Services\Restaurants\SearchService'
 
     App\Services\Restaurants\RestaurantsService:
+        arguments:
+            - '@App\Services\Restaurants\Interfaces\DistanceServiceInterface'
+            - '@App\Services\Restaurants\Interfaces\SearchServiceInterface'
+
+    App\Services\Restaurants\DistanceService:
+        arguments:
+            - '%env(GOOGLE_DISTANCE_MATRIX_API_KEY)%'
+            - '@App\Services\Http\Interfaces\ClientInterface'
+
+    App\Services\Restaurants\SearchService:
         arguments:
             - '%env(GOOGLE_PLACES_API_KEY)%'
             - '@App\Services\Http\Interfaces\ClientInterface'

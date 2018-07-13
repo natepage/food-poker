@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Services\Repositories;
 
+use App\Database\Entities\GeoLocation\Address;
 use App\Interfaces\EntityInterface;
 use App\Services\Repositories\Exceptions\InvalidEntityException;
 use App\Services\Repositories\Interfaces\RepositoryInterface;
@@ -61,7 +62,7 @@ abstract class AbstractRepository implements RepositoryInterface
     protected function checkEntityInterface(string $entityClass): void
     {
         $entity = new $entityClass();
-        
+
         if (!$entity instanceof EntityInterface) {
             throw new InvalidEntityException(\sprintf(
                 'Entity %s must implement %s',
@@ -69,6 +70,24 @@ abstract class AbstractRepository implements RepositoryInterface
                 EntityInterface::class
             ));
         }
+    }
+
+    /**
+     * Get inline string format for given filters.
+     *
+     * @param array $filters
+     *
+     * @return string
+     */
+    protected function formatFiltersForException(array $filters): string
+    {
+        $inline = [];
+
+        foreach ($filters as $name => $value) {
+            $inline[] = \sprintf('%s => %s', $name, $value);
+        }
+
+        return \implode(', ', $inline);
     }
 
     /**

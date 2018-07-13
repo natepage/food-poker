@@ -3,136 +3,91 @@ declare(strict_types=1);
 
 namespace App\Services\Restaurants;
 
-use App\Services\Http\Exceptions\RequestException as ClientRequestException;
-use App\Services\Http\Interfaces\ClientInterface;
-use App\Services\Restaurants\Exceptions\InvalidLocationException;
-use App\Services\Restaurants\Exceptions\InvalidRadiusException;
 use App\Services\Restaurants\Exceptions\NoResultsException;
-use App\Services\Restaurants\Exceptions\RequestException;
-use App\Services\Restaurants\Interfaces\RestaurantResultsCollectionInterface;
-use App\Services\Restaurants\Interfaces\RestaurantSearchDataInterface;
+use App\Services\Restaurants\Interfaces\DistanceDataInterface;
+use App\Services\Restaurants\Interfaces\DistanceServiceInterface;
 use App\Services\Restaurants\Interfaces\RestaurantsServiceInterface;
+use App\Services\Restaurants\Interfaces\ResultInterface;
+use App\Services\Restaurants\Interfaces\ResultsCollectionInterface;
+use App\Services\Restaurants\Interfaces\SearchDataInterface;
+use App\Services\Restaurants\Interfaces\SearchServiceInterface;
 
 class RestaurantsService implements RestaurantsServiceInterface
 {
     /**
-     * @var string
+     * @var \App\Services\Restaurants\Interfaces\DistanceServiceInterface
      */
-    private $apiKey;
+    private $distanceService;
 
     /**
-     * @var string
+     * @var \App\Services\Restaurants\Interfaces\SearchServiceInterface
      */
-    private $baseUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
-
-    /**
-     * @var \App\Services\Http\Interfaces\ClientInterface
-     */
-    private $client;
+    private $searchService;
 
     /**
      * RestaurantsService constructor.
      *
-     * @param string $apiKey
-     * @param \App\Services\Http\Interfaces\ClientInterface $client
+     * @param \App\Services\Restaurants\Interfaces\DistanceServiceInterface $distanceService
+     * @param \App\Services\Restaurants\Interfaces\SearchServiceInterface $searchService
      */
-    public function __construct(string $apiKey, ClientInterface $client)
+    public function __construct(DistanceServiceInterface $distanceService, SearchServiceInterface $searchService)
     {
-        $this->apiKey = $apiKey;
-        $this->client = $client;
+        $this->distanceService = $distanceService;
+        $this->searchService = $searchService;
     }
 
     /**
-     * Search restaurants for given data.
+     * Find restaurants for given search and distance data.
      *
-     * @param \App\Services\Restaurants\Interfaces\RestaurantSearchDataInterface $data
+     * @param \App\Services\Restaurants\Interfaces\DistanceDataInterface $distanceData
+     * @param \App\Services\Restaurants\Interfaces\SearchDataInterface $searchData
      *
-     * @return \App\Services\Restaurants\Interfaces\RestaurantResultsCollectionInterface
+     * @return \App\Services\Restaurants\Interfaces\ResultsCollectionInterface
      *
-     * @throws \App\Services\Restaurants\Exceptions\RequestException
+     * @throws \App\Services\Restaurants\Exceptions\InvalidLocationException
+     * @throws \App\Services\Restaurants\Exceptions\InvalidRadiusException
      * @throws \App\Services\Restaurants\Exceptions\NoResultsException
-     * @throws \App\Services\Restaurants\Exceptions\InvalidLocationException
-     * @throws \App\Services\Restaurants\Exceptions\InvalidRadiusException
+     * @throws \App\Services\Restaurants\Exceptions\RequestException
      */
-    public function search(RestaurantSearchDataInterface $data): RestaurantResultsCollectionInterface
-    {
-        try {
-            $results = $this->getResults($data);
-        } catch (ClientRequestException $exception) {
-            throw new RequestException($exception->getExtendedMessage());
+    public function findRestaurants(
+        DistanceDataInterface $distanceData,
+        SearchDataInterface $searchData
+    ): ResultsCollectionInterface {
+        $results = $this->searchService->search($searchData);
+
+        if ($results->isEmpty()) {
+            throw $this->noResultsException($distanceData, $searchData);
         }
 
-        if (empty($results)) {
-            throw new NoResultsException(\sprintf(
-                'No results for given query: %s',
-                \json_encode($data->toArray())
-            ));
+        $results = $this->distanceService
+            ->confirmInRadius($distanceData, $results, $searchData)
+            ->filter(function (ResultInterface $result): bool {
+                return $result->isInRadius();
+            });
+
+        if ($results->isEmpty()) {
+            throw $this->noResultsException($distanceData, $searchData);
         }
 
-        return new RestaurantResultsCollection($results);
+        /** @var ResultsCollectionInterface $results */
+        return $results;
     }
 
     /**
-     * Get request data with user-key.
+     * Get no results exception.
      *
-     * @param \App\Services\Restaurants\Interfaces\RestaurantSearchDataInterface $data
+     * @param \App\Services\Restaurants\Interfaces\DistanceDataInterface $distanceData
+     * @param \App\Services\Restaurants\Interfaces\SearchDataInterface $searchData
      *
-     * @return array
-     *
-     * @throws \App\Services\Restaurants\Exceptions\InvalidLocationException
-     * @throws \App\Services\Restaurants\Exceptions\InvalidRadiusException
+     * @return \App\Services\Restaurants\Exceptions\NoResultsException
      */
-    private function getRequestData(RestaurantSearchDataInterface $data): array
-    {
-        $radius = $data->getRadius() ?? self::DEFAULT_RADIUS;
-
-        // Validate radius
-        if ($radius < 0 || self::MAX_RADIUS < $radius) {
-            throw new InvalidRadiusException(\sprintf(
-                'Radius must be between 0,%d (%d given)',
-                self::MAX_RADIUS,
-                $radius
-            ));
-        }
-        // Validate location
-        if (null === $data->getLatitude() || null === $data->getLongitude()) {
-            throw new InvalidLocationException(\sprintf(
-                'Invalid coordinates: [latitude: %s, longitude: %s]',
-                $data->getLatitude() ?? 'null',
-                $data->getLongitude() ?? 'null'
-            ));
-        }
-
-        $requestData = [
-            'key' => $this->apiKey,
-            'location' => \sprintf('%s,%s', $data->getLatitude(), $data->getLongitude()),
-            'radius' => $radius,
-            'type' => 'restaurant',
-            'keyword' => $data->getQuery()
-        ];
-
-        if ($data->getOpenNow() ?? false) {
-            $requestData['opennow'] = true;
-        }
-
-        return ['query' => $requestData];
-    }
-
-    /**
-     * Get results from Google Places API.
-     *
-     * @param \App\Services\Restaurants\Interfaces\RestaurantSearchDataInterface $data
-     *
-     * @return array
-     *
-     * @throws \App\Services\Http\Exceptions\RequestException
-     * @throws \App\Services\Restaurants\Exceptions\InvalidLocationException
-     * @throws \App\Services\Restaurants\Exceptions\InvalidRadiusException
-     */
-    private function getResults(RestaurantSearchDataInterface $data): array
-    {
-        $response = $this->client->request('GET', $this->baseUrl, $this->getRequestData($data));
-
-        return $response['results'] ?? [];
+    private function noResultsException(
+        DistanceDataInterface $distanceData,
+        SearchDataInterface $searchData
+    ): NoResultsException {
+        return new NoResultsException(\sprintf(
+            'No results for given query: %s',
+            \json_encode(\array_merge($distanceData->toArray(), $searchData->toArray()))
+        ));
     }
 }

@@ -5,7 +5,7 @@ namespace App\Services\Restaurants\Interfaces;
 
 use App\Helpers\Interfaces\DataTransferObjectHelperInterface;
 
-interface RestaurantSearchDataInterface extends DataTransferObjectHelperInterface
+interface SearchDataInterface extends DataTransferObjectHelperInterface
 {
     /**
      * Get latitude.
@@ -45,7 +45,7 @@ interface RestaurantSearchDataInterface extends DataTransferObjectHelperInterfac
     /**
      * Get radius.
      *
-     * @return null|int|string
+     * @return int
      */
-    public function getRadius();
+    public function getRadius(): int;
 }

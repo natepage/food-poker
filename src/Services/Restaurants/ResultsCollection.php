@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace App\Services\Restaurants;
 
 use App\Helpers\AbstractCollection;
-use App\Services\Restaurants\Interfaces\RestaurantResultInterface;
-use App\Services\Restaurants\Interfaces\RestaurantResultsCollectionInterface;
+use App\Services\Restaurants\Interfaces\ResultInterface;
+use App\Services\Restaurants\Interfaces\ResultsCollectionInterface;
 
-class RestaurantResultsCollection extends AbstractCollection implements RestaurantResultsCollectionInterface
+class ResultsCollection extends AbstractCollection implements ResultsCollectionInterface
 {
     /**
-     * RestaurantResultsCollection constructor.
+     * ResultsCollection constructor.
      *
      * @param array|null $elements
      */
@@ -19,12 +19,12 @@ class RestaurantResultsCollection extends AbstractCollection implements Restaura
         $results = [];
 
         foreach ($elements ?? [] as $element) {
-            if ($element instanceof RestaurantResultInterface) {
+            if ($element instanceof ResultInterface) {
                 $results[] = $element;
             }
 
             if (\is_array($element)) {
-                $results[] = new RestaurantResult($element);
+                $results[] = new Result($element);
             }
         }
 
@@ -41,7 +41,7 @@ class RestaurantResultsCollection extends AbstractCollection implements Restaura
         $array = [];
 
         foreach (parent::toArray() as $restaurant) {
-            /** @var \App\Services\Restaurants\Interfaces\RestaurantResultInterface $restaurant */
+            /** @var \App\Services\Restaurants\Interfaces\ResultInterface $restaurant */
             $array[] = $restaurant->toArray();
         }
 

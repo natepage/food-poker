@@ -39,6 +39,17 @@ interface RepositoryInterface
     public function find(string $id): EntityInterface;
 
     /**
+     * Find entity for given filters.
+     *
+     * @param array $filters
+     *
+     * @return \App\Interfaces\EntityInterface
+     *
+     * @throws \App\Interfaces\NotFoundExceptionInterface
+     */
+    public function findOneBy(array $filters): EntityInterface;
+
+    /**
      * Set entity class.
      *
      * @param string $entity

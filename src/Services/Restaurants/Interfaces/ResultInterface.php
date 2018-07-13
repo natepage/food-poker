@@ -5,15 +5,8 @@ namespace App\Services\Restaurants\Interfaces;
 
 use App\Helpers\Interfaces\DataTransferObjectHelperInterface;
 
-interface RestaurantResultInterface extends DataTransferObjectHelperInterface
+interface ResultInterface extends DataTransferObjectHelperInterface
 {
-    /**
-     * Get restaurant formatted address.
-     *
-     * @return null|string
-     */
-    public function getFormattedAddress(): ?string;
-
     /**
      * Get restaurant name.
      *
@@ -41,4 +34,11 @@ interface RestaurantResultInterface extends DataTransferObjectHelperInterface
      * @return null|string
      */
     public function getRating(): ?string;
+
+    /**
+     * Check if result is in radius.
+     *
+     * @return bool
+     */
+    public function isInRadius(): bool;
 }

@@ -4,29 +4,11 @@ declare(strict_types=1);
 namespace App\Services\Restaurants;
 
 use App\Helpers\AbstractDataTransferObject;
-use App\Services\Restaurants\Interfaces\RestaurantSearchDataInterface;
+use App\Services\Restaurants\Interfaces\SearchDataInterface;
+use App\Services\Restaurants\Interfaces\SearchServiceInterface;
 
-class RestaurantSearchData extends AbstractDataTransferObject implements RestaurantSearchDataInterface
+class SearchData extends AbstractDataTransferObject implements SearchDataInterface
 {
-    /**
-     * RestaurantSearchData constructor.
-     *
-     * @param array|null $data
-     */
-    public function __construct(?array $data = null)
-    {
-        $this->attributes = [
-            'latitude',
-            'limit',
-            'longitude',
-            'open_now',
-            'query',
-            'radius'
-        ];
-
-        parent::__construct($data);
-    }
-
     /**
      * Get latitude.
      *
@@ -80,10 +62,27 @@ class RestaurantSearchData extends AbstractDataTransferObject implements Restaur
     /**
      * Get radius.
      *
-     * @return null|int|string
+     * @return int
      */
-    public function getRadius()
+    public function getRadius(): int
     {
-        return $this->get('radius');
+        return (int)$this->get('radius', SearchServiceInterface::DEFAULT_RADIUS);
+    }
+
+    /**
+     * Initiate attributes.
+     *
+     * @return array
+     */
+    protected function initAttributes(): array
+    {
+        return [
+            'latitude',
+            'limit',
+            'longitude',
+            'open_now',
+            'query',
+            'radius'
+        ];
     }
 }
