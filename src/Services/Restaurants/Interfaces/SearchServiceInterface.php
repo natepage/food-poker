@@ -20,7 +20,7 @@ interface SearchServiceInterface
     public const MAX_RADIUS = 50000;
 
     /**
-     * Search restaurants for given data.
+     * SearchPage restaurants for given data.
      *
      * @param \App\Services\Restaurants\Interfaces\SearchDataInterface $data
      *

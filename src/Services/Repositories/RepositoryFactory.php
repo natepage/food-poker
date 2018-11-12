@@ -60,7 +60,7 @@ class RepositoryFactory implements RepositoryFactoryInterface
         try {
             $repository = $this->container->get($repositoryClass);
         } catch (NotFoundExceptionInterface | ContainerExceptionInterface $exception) {
-            throw new UnableCreateRepositoryException(\sprintf('Container error: %s', $exception->getMessage()));
+            throw new UnableCreateRepositoryException(\sprintf('ResponsiveContainer.js error: %s', $exception->getMessage()));
         }
 
         if (!$repository instanceof RepositoryInterface) {
