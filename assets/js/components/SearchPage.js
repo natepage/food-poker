@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import ResponsiveContainer from './ResponsiveContainer';
 import SearchInput from './SearchInput';
 import { withStyles } from '@material-ui/core/styles';
@@ -20,5 +21,9 @@ class SearchPage extends React.Component {
         );
     }
 }
+
+SearchInput.propTypes = {
+    classes: PropTypes.object.isRequired
+};
 
 export default withStyles(styles)(SearchPage);
