@@ -22,7 +22,7 @@ class SearchPage extends React.Component {
     }
 }
 
-SearchInput.propTypes = {
+SearchPage.propTypes = {
     classes: PropTypes.object.isRequired
 };
 
