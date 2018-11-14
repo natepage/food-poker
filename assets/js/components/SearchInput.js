@@ -91,15 +91,17 @@ const styles = theme => ({
     root: {
         flexGrow: 1,
         fontFamily: theme.typography.fontFamily,
+        marginBottom: 16,
         position: 'relative'
     },
     suggestionsContainer: {
+        backgroundColor: theme.palette.background.paper,
         boxShadow: theme.shadows[1],
         padding: 16,
         position: 'absolute',
         width: '100%',
         top: 55,
-        zIndex: 5000
+        zIndex: 1600
     }
 });
 
@@ -107,7 +109,4 @@ SearchInput.propTypes = {
     classes: PropTypes.object.isRequired
 };
 
-export default compose(
-    withStyles(styles),
-    connect(mapStateToProps, mapDispatchToProps)
-)(SearchInput);
+export default compose(withStyles(styles), connect(mapStateToProps, mapDispatchToProps))(SearchInput);

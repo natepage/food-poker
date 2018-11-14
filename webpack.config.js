@@ -40,6 +40,9 @@ Encore
     // enables Sass/SCSS support
     .enableSassLoader()
     .enableReactPreset()
+    .configureBabel(function (babelConfig) {
+        babelConfig.plugins = ["transform-object-rest-spread", "transform-class-properties"]
+    })
 ;
 
 module.exports = Encore.getWebpackConfig();
