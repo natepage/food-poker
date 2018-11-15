@@ -1,20 +1,57 @@
 let defaultState = {
     isSearching: false,
-    nextNotification: -1,
     notifications: [],
     searchAddress: '',
     searchPlaceId: null
 };
 
+let notificationFactory = (notification, options = {}) => {
+    let key = new Date().getTime() + Math.random();
+
+    if (typeof notification === 'string') {
+        notification = {message: notification};
+    }
+
+    return {
+        key: key,
+        ...notification,
+        options: {
+            ...notification.options,
+            ...options
+        }
+    };
+};
+
 const reducers = (state = defaultState, action) => {
     switch (action.type) {
-        case 'ADD_NOTIFICATION':
-            let key = state.nextNotification + 1;
-
+        case 'NOTIFY':
             return {
                 ...state,
-                nextNotification: key,
-                notifications: [{...action.notification, key: key}, ...state.notifications]
+                notifications: [notificationFactory(action.notification), ...state.notifications]
+            };
+
+        case 'NOTIFY_ERROR':
+            return {
+                ...state,
+                notifications: [notificationFactory(action.notification, {variant: 'error'}), ...state.notifications]
+            };
+
+        case 'NOTIFY_INFO':
+            return {
+                ...state,
+                notifications: [notificationFactory(action.notification, {variant: 'info'}), ...state.notifications]
+            };
+
+        case 'NOTIFY_SUCCESS':
+            return {
+                ...state,
+                notifications: [notificationFactory(action.notification, {variant: 'success'}), ...state.notifications]
+            };
+
+        case 'NOTIFY_WARNING':
+            return {
+                ...state,
+                notifications: [notificationFactory(action.notification, {variant: 'warning'}), ...state.notifications]
             };
 
         case 'REMOVE_NOTIFICATION':
@@ -40,7 +77,8 @@ const reducers = (state = defaultState, action) => {
         case 'SEARCH_RESTAURANT_FAILURE':
             return {...state, isSearching: false};
 
-        default: return state;
+        default:
+            return state;
     }
 };
 
