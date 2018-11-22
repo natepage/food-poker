@@ -28,20 +28,21 @@ class SearchInput extends React.Component
     };
 
     render() {
+        const { address, classes } = this.props;
         const inputProps = {
             placeholder: 'Search Places ...',
-            className: this.props.classes.input
+            className: classes.input
         };
 
         return (
-            <div className={this.props.classes.root}>
-                <PlacesAutocomplete value={this.props.searchAddress} onChange={this.handleChange} onSelect={this.handleSelect}>
+            <div className={classes.root}>
+                <PlacesAutocomplete value={address} onChange={this.handleChange} onSelect={this.handleSelect}>
                     {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
                         <div>
                             <input {...getInputProps(inputProps)} />
-                            <div className={this.props.classes.suggestionsContainer} hidden={!loading && suggestions.length <= 0}>
+                            <div className={classes.suggestionsContainer} hidden={!loading && suggestions.length <= 0}>
                                 {loading && suggestions.length <= 0 &&
-                                    <div className={this.props.classes.loaderContainer}>
+                                    <div className={classes.loaderContainer}>
                                         <CircularProgress/>
                                     </div>
                                 }
@@ -65,8 +66,8 @@ class SearchInput extends React.Component
 
 const mapStateToProps = (store) => {
     return {
-        searchAddress: store.state.searchAddress,
-        searchPlaceId: store.state.searchPlaceId
+        address: store.state.address,
+        placeId: store.state.placeId
     }
 };
 
@@ -106,7 +107,9 @@ const styles = theme => ({
 });
 
 SearchInput.propTypes = {
-    classes: PropTypes.object.isRequired
+    address: PropTypes.string.isRequired,
+    classes: PropTypes.object.isRequired,
+    placeId: PropTypes.string
 };
 
 export default compose(withStyles(styles), connect(mapStateToProps, mapDispatchToProps))(SearchInput);

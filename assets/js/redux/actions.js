@@ -69,3 +69,18 @@ export const searchRestaurant = request => (dispatch => {
 
     return axios.post('/api/games/roulette', request).then(response => console.log(response));
 });
+
+export const toggleSettings = () => ({
+    type: 'TOGGLE_SETTINGS'
+});
+
+export const updateSettingsValue = (name, value) => ({
+    type: 'UPDATE_SETTINGS_VALUE',
+    name: name,
+    value: value
+});
+
+export const updateSettingsValid = valid => ({
+    type: 'UPDATE_SETTINGS_VALID',
+    valid: valid
+});
